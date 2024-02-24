@@ -73,10 +73,20 @@ EXTRA_DIST = Doxyfile \
 .PHONY: ChangeLog doc
 
 ChangeLog:
-	git --git-dir '$(top_srcdir)/.git' log >$@ || touch $@
+if HAVE_PROG_GIT
+	if test -d '$(top_srcdir)/.git'; then \
+	  $(GIT) --git-dir '$(top_srcdir)/.git' log > ChangeLog; \
+	else \
+	  echo "Generated dummy ChangeLog file (no .git directory)" > ChangeLog; \
+	fi
+else
+	echo "Generated dummy ChangeLog file (no git tool)" > ChangeLog
+endif
 
 DISTCLEANFILES = ChangeLog
 dist-hook: ChangeLog
 
+if HAVE_PROG_DOXYGEN
 doc: $(include_HEADERS) $(top_srcdir)/Doxyfile
 	doxygen $(top_srcdir)/Doxyfile
+endif

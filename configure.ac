@@ -50,6 +50,19 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 
+AC_DEFUN([SP_PROG], [dnl
+  m4_assert([$# >= 2])[]dnl
+  AC_ARG_VAR(m4_toupper($1), [$2])
+  AS_VAR_IF(m4_toupper($1), [], [dnl
+    AC_PATH_PROG(m4_toupper($1), [$1], [no])
+  ])
+  AM_CONDITIONAL([HAVE_PROG_]m4_toupper($1), [test "x$m4_toupper($1)" != xno])
+])dnl
+
+SP_PROG([doxygen], [doxygen documentation system])
+SP_PROG([git],     [git revision control system])
+
+
 ## SP_PROG_VERSION(program, sh-var)
 ## Obtain the version of <program> and store it in <sh-var>.
 AC_DEFUN([SP_PROG_VERSION],
