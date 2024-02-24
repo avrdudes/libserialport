@@ -93,16 +93,42 @@ AC_SUBST([SP_PACKAGE_VERSION], [sp_package_version])
 # Carefully read the libtool docs before updating these numbers!
 # The algorithm for determining which number to change (and how) is nontrivial!
 # http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-SP_LIB_VERSION_CURRENT=1
-SP_LIB_VERSION_REVISION=0
-SP_LIB_VERSION_AGE=1
-AC_SUBST([SP_LIB_VERSION],
-	["$SP_LIB_VERSION_CURRENT:$SP_LIB_VERSION_REVISION:$SP_LIB_VERSION_AGE"])
+m4_define([sp_lib_version_current],  [1])dnl
+m4_define([sp_lib_version_revision], [0])dnl
+m4_define([sp_lib_version_age],      [1])dnl
+m4_define([sp_lib_version], [sp_lib_version_current:sp_lib_version_revision:sp_lib_version_age])dnl
+AC_SUBST([SP_LIB_VERSION], ["sp_lib_version"])
 
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_CURRENT], [$SP_LIB_VERSION_CURRENT], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_REVISION], [$SP_LIB_VERSION_REVISION], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_AGE], [$SP_LIB_VERSION_AGE], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_STRING], ["$SP_LIB_VERSION"], [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_CURRENT],  [sp_lib_version_current],  [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_REVISION], [sp_lib_version_revision], [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_AGE],      [sp_lib_version_age],      [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_STRING],   ["sp_lib_version"],        [.])
+
+dnl ------------------------------------------------------------------------
+dnl When necessary, update the libserialport.h source file according
+dnl to changed above sp_package_version* and sp_lib_version* values.
+dnl ------------------------------------------------------------------------
+m4_define([sp_sed_command_args], [])dnl
+m4_define([sp_sed_command_add], [dnl
+  m4_append([sp_sed_command_args],
+            [ -e 's|^\([[:punct:]]define $1\)[[:space:]].*|\1 ]$2[|g'])dnl
+])dnl
+dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MAJOR],  [sp_package_version_major])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MINOR],  [sp_package_version_minor])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MICRO],  [sp_package_version_micro])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_STRING], ["sp_package_version"])dnl
+dnl
+sp_sed_command_add([SP_LIB_VERSION_CURRENT],  [sp_lib_version_current])dnl
+sp_sed_command_add([SP_LIB_VERSION_REVISION], [sp_lib_version_revision])dnl
+sp_sed_command_add([SP_LIB_VERSION_AGE],      [sp_lib_version_age])dnl
+sp_sed_command_add([SP_LIB_VERSION_STRING],   ["sp_lib_version"])dnl
+dnl
+m4_esyscmd([./buildstuff/sed-update-source-file libserialport.h]m4_defn([sp_sed_command_args]))dnl
+m4_case(m4_sysval, [0], [], [dnl
+  m4_fatal([sed-update-source-file script returned non-0])
+])dnl
+
 
 AM_CONDITIONAL([LINUX], [test -z "${host_os##linux*}" || test -z "${host_os##uclinux*}"])
 AM_CONDITIONAL([WIN32], [test -z "${host_os##mingw*}"])
