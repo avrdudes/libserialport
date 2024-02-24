@@ -70,7 +70,7 @@ EXTRA_DIST = Doxyfile \
 	examples/await_events.c \
 	examples/handle_errors.c
 
-MAINTAINERCLEANFILES = ChangeLog
+DISTCLEANFILES = ChangeLog
 
 .PHONY: ChangeLog doc
 
