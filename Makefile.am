@@ -51,7 +51,7 @@ if MACOSX
 libserialport_la_LDFLAGS += -framework IOKit -framework CoreFoundation
 endif
 
-nodist_include_HEADERS = libserialport.h
+include_HEADERS = libserialport.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libserialport.pc
@@ -79,5 +79,5 @@ ChangeLog:
 
 dist-hook: ChangeLog
 
-doc: $(nodist_include_HEADERS) $(top_srcdir)/Doxyfile
+doc: $(include_HEADERS) $(top_srcdir)/Doxyfile
 	doxygen $(top_srcdir)/Doxyfile
