@@ -70,13 +70,12 @@ EXTRA_DIST = Doxyfile \
 	examples/await_events.c \
 	examples/handle_errors.c
 
-DISTCLEANFILES = ChangeLog
-
 .PHONY: ChangeLog doc
 
 ChangeLog:
 	git --git-dir '$(top_srcdir)/.git' log >$@ || touch $@
 
+DISTCLEANFILES = ChangeLog
 dist-hook: ChangeLog
 
 doc: $(include_HEADERS) $(top_srcdir)/Doxyfile
