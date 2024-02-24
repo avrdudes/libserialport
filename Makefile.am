@@ -70,6 +70,51 @@ EXTRA_DIST = Doxyfile \
 	examples/await_events.c \
 	examples/handle_errors.c
 
+EXTRA_DIST += AUTHORS
+EXTRA_DIST += COPYING
+EXTRA_DIST += NEWS
+EXTRA_DIST += README
+
+EXTRA_DIST += autogen.sh
+EXTRA_DIST += config-header.py
+EXTRA_DIST += config-pattern
+
+EXTRA_DIST += common.props
+EXTRA_DIST += debug.props
+EXTRA_DIST += release.props
+
+EXTRA_DIST += libserialport.sln
+EXTRA_DIST += libserialport.vcxproj
+EXTRA_DIST += libserialport.vcxproj.filters
+
+EXTRA_DIST += examples/Makefile
+EXTRA_DIST += examples/README
+EXTRA_DIST += examples/examples.sln
+
+EXTRA_DIST += examples/await_events.c
+EXTRA_DIST += examples/projects/await_events.vcxproj
+EXTRA_DIST += examples/projects/await_events.vcxproj.filters
+
+EXTRA_DIST += examples/handle_errors.c
+EXTRA_DIST += examples/projects/handle_errors.vcxproj
+EXTRA_DIST += examples/projects/handle_errors.vcxproj.filters
+
+EXTRA_DIST += examples/list_ports.c
+EXTRA_DIST += examples/projects/list_ports.vcxproj
+EXTRA_DIST += examples/projects/list_ports.vcxproj.filters
+
+EXTRA_DIST += examples/port_config.c
+EXTRA_DIST += examples/projects/port_config.vcxproj
+EXTRA_DIST += examples/projects/port_config.vcxproj.filters
+
+EXTRA_DIST += examples/port_info.c
+EXTRA_DIST += examples/projects/port_info.vcxproj
+EXTRA_DIST += examples/projects/port_info.vcxproj.filters
+
+EXTRA_DIST += examples/send_receive.c
+EXTRA_DIST += examples/projects/send_receive.vcxproj
+EXTRA_DIST += examples/projects/send_receive.vcxproj.filters
+
 .PHONY: ChangeLog doc
 
 ChangeLog:
