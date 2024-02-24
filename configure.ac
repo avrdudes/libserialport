@@ -61,6 +61,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_SED
 AC_PROG_INSTALL
 AC_PROG_LN_S
 
@@ -129,6 +130,37 @@ dnl
 m4_esyscmd([./buildstuff/sed-update-source-file libserialport.h]m4_defn([sp_sed_command_args]))dnl
 m4_case(m4_sysval, [0], [], [dnl
   m4_fatal([sed-update-source-file script returned non-0])
+])dnl
+
+dnl ------------------------------------------------------------------------
+dnl Generate the CMakeLists.txt file from CMakeLists.txt.in according
+dnl to the above sp_package_version* and sp_lib_version* values.
+dnl ------------------------------------------------------------------------
+m4_define([sp_sed_command_args], [])dnl
+m4_define([sp_sed_command_add], [dnl
+  m4_append([sp_sed_command_args],
+            [ -e 's|[@]]$1[@|]$2[|g'])dnl
+])dnl
+dnl
+sp_sed_command_add([PACKAGE_TARNAME], [AC_PACKAGE_TARNAME])dnl
+sp_sed_command_add([PACKAGE_NAME],    [AC_PACKAGE_NAME])dnl
+sp_sed_command_add([PACKAGE_VERSION], [AC_PACKAGE_VERSION])dnl
+sp_sed_command_add([PACKAGE_URL],     [AC_PACKAGE_URL])dnl
+dnl
+dnl TODO: Make sure the _minor and _micro values are calculcated correctly.
+m4_define([cmake_lib_version_major], [m4_eval(sp_lib_version_current, sp_lib_version_age)])dnl
+m4_define([cmake_lib_version_minor], [sp_lib_version_age])dnl
+m4_define([cmake_lib_version_micro], [sp_lib_version_revision])dnl
+m4_define([cmake_lib_version], sp_lib_version_major.sp_lib_version_minor.sp_lib_version_micro)dnl
+sp_sed_command_add([CMAKE_LIB_SOVERSION], [cmake_lib_version_major])dnl
+sp_sed_command_add([CMAKE_LIB_VERSION],   [cmake_lib_version])dnl
+dnl
+AC_SUBST([LIBGPHOTO2_CURRENT_MIN],
+         [`expr $LIBGPHOTO2_CURRENT - $LIBGPHOTO2_AGE`])
+
+m4_esyscmd([./buildstuff/sed-substitute CMakeLists.txt.in]m4_defn([sp_sed_command_args]))dnl
+m4_case(m4_sysval, [0], [], [dnl
+  m4_fatal([sed-substitute script returned non-0])
 ])dnl
 
 

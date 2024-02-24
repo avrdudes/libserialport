@@ -1,0 +1,11 @@
+/* cmake-config.h.in.  Manually generated from config.h.in */
+
+#cmakedefine SP_PACKAGE_VERSION_MAJOR
+#cmakedefine SP_PACKAGE_VERSION_MINOR
+#cmakedefine SP_PACKAGE_VERSION_MICRO
+#cmakedefine SP_PACKAGE_VERSION_STRING
+
+#cmakedefine SP_LIB_VERSION_CURRENT
+#cmakedefine SP_LIB_VERSION_AGE
+#cmakedefine SP_LIB_VERSION_REVISION
+#cmakedefine SP_LIB_VERSION_STRING

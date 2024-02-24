@@ -1,0 +1,81 @@
+#! /bin/sh
+#
+# Usage:
+#   sed-substitute <filename> sed-arguments...
+#
+# This will take the given source file <filename> (must end with
+# ".in"), run sed with the given sed arguments on it, and checks if
+# the result is different from the <filename> without the trailing
+# ".in".
+#
+# If this changes the content of <filename>, it updates the <filename>
+# file and fails the autoreconf run to allow the user to commit the
+# generated file.
+
+set -e
+
+prog="$(basename "$0")"
+
+inname="$1"
+test -n "$inname" || {
+    echo "$prog: error: no source file given" >&2
+    exit 2
+}
+shift
+case "$inname" in
+    *.in)
+	:
+	;;
+    *)
+	echo "$prog: error: source file name does not end with \".in\": $inname" >&2
+	exit 2
+	;;
+esac
+test -f "$inname" || {
+    echo "$prog: error: source file is no file: $inname" >&2
+    exit 2
+}
+
+case "$outname" in
+    */*)
+	outname="$(dirname "$inname")/$(basename "$inname" .in)"
+	;;
+    *)
+	outname="$(basename "$inname" .in)"
+	;;
+esac
+
+tmpname="$outname.tmp.$$"
+
+
+${SED-sed} -e "s|[@]configure_input[@]|$outname.  Generated from $inname by configure.ac.|g" "$@" < "$inname" > "$tmpname" || {
+    s="$?"
+    echo "$prog: Error running sed, exit code $s."
+    rm -f "$tmpname"
+    exit 2
+}
+
+if grep '[@][A-Za-z0-9_-]\{1,\}@' "$tmpname" >&2; then
+    echo "$prog: Unsubstituted values found while substituting $inname" >&2
+    rm -f "$tmpname"
+    exit 2
+fi
+
+if test -f "$outname"; then
+    if ${CMP-cmp} "$outname" "$tmpname" > /dev/null; then
+	# echo "$prog: source file up to date: $outname" >&2
+	rm -f "$tmpname"
+	exit 0
+    else
+	${DIFF-diff} -u "$outname" "$tmpname" >&2 ||:
+	mv -f "$tmpname" "$outname"
+	echo "$prog: source file has been updated: $outname" >&2
+	echo "$prog: commit the file, and then re-run autoreconf." >&2
+	exit 1
+    fi
+else
+    mv -f "$tmpname" "$outname"
+    echo "$prog: created new source file: $outname" >&2
+    echo "$prog: commit the file, and then re-run autoreconf." >&2
+    exit 1
+fi

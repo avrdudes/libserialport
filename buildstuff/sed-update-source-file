@@ -3,7 +3,9 @@
 # Usage:
 #   sed-update-source-file <filename> sed-arguments...
 #
-# This will take the given source file <filename>, run sed with the given sed arguments on it, and if the sed output differs from the input, will update <filename> and not
+# This will take the given source file <filename>, run sed with the
+# given sed commands on it, and if the sed output differs from the
+# input, will update <filename> and abort the autoreconf process.
 
 set -e
 
