@@ -79,10 +79,10 @@ SP_PROG_VERSION([$CC], [sp_cc_version])
 # Initialize libtool.
 LT_INIT
 
-AC_DEFINE([SP_PACKAGE_VERSION_MAJOR], [sp_package_version_major], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_MINOR], [sp_package_version_minor], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_MICRO], [sp_package_version_micro], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_STRING], ["sp_package_version"], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MAJOR],  [sp_package_version_major], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MINOR],  [sp_package_version_minor], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MICRO],  [sp_package_version_micro], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_STRING], ["sp_package_version"],     [.])
 AC_SUBST([SP_PACKAGE_VERSION], [sp_package_version])
 
 # Library version for libserialport (NOT the same as the package version).
