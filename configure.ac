@@ -29,6 +29,15 @@ m4_define([sp_package_version_micro], [1])
 m4_define([sp_package_version_tweak], [23])
 m4_define([sp_package_version], [sp_package_version_major.sp_package_version_minor.sp_package_version_micro]m4_ifdef([sp_package_version_tweak], [.][sp_package_version_tweak]))
 
+# Library version for libserialport (NOT the same as the package version).
+# Carefully read the libtool docs before updating these numbers!
+# The algorithm for determining which number to change (and how) is nontrivial!
+# http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
+m4_define([sp_lib_version_current],  [1])
+m4_define([sp_lib_version_revision], [0])
+m4_define([sp_lib_version_age],      [1])
+m4_define([sp_lib_version], [sp_lib_version_current:sp_lib_version_revision:sp_lib_version_age])
+
 AC_INIT([avrdudes bugfix fork of sigrok libserialport],
 	[sp_package_version],
 	[https://github.com/avrdudes/libserialport/issues],
@@ -90,14 +99,6 @@ AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MICRO],  [sp_package_version_micro], [.])
 AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_STRING], ["sp_package_version"],     [.])
 AC_SUBST([SP_PACKAGE_VERSION], [sp_package_version])
 
-# Library version for libserialport (NOT the same as the package version).
-# Carefully read the libtool docs before updating these numbers!
-# The algorithm for determining which number to change (and how) is nontrivial!
-# http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-m4_define([sp_lib_version_current],  [1])dnl
-m4_define([sp_lib_version_revision], [0])dnl
-m4_define([sp_lib_version_age],      [1])dnl
-m4_define([sp_lib_version], [sp_lib_version_current:sp_lib_version_revision:sp_lib_version_age])dnl
 AC_SUBST([SP_LIB_VERSION], ["sp_lib_version"])
 
 AC_DEFINE_UNQUOTED([SP_LIB_VERSION_CURRENT],  [sp_lib_version_current],  [.])
