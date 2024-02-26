@@ -46,7 +46,7 @@ jobs:
           cmake
           automake
           libtool
-      - name: at: configure
+      - name: "at: configure"
         run: >-
           ./autogen.sh
 
@@ -54,15 +54,15 @@ jobs:
 
           ../configure
           --prefix=/usr/local
-      - name: at: build
+      - name: "at: build"
         run: make -C _build-at -j$(nproc)
-      - name: at: install
+      - name: "at: install"
         run: sudo make -C _build-at install DESTDIR=$PWD/_d
-      - name: at: list installed files
+      - name: "at: list installed files"
         run: find _dest-at | env LC_ALL=C sort | sed 's|^__dest-at||'
-      - name: distcheck
+      - name: "at: distcheck"
         run: make -C _atbuild -j$(nproc) distcheck
-      - name: cm: configure
+      - name: "cm: configure"
         run: >-
           cd ..
 
@@ -70,11 +70,11 @@ jobs:
           -B _build-cm
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -D CMAKE_INSTALL_PREFIX:PATH=/usr/local
-      - name: cm: build
+      - name: "cm: build"
         run: cmake --build _build-cm
-      - name: cm: install
+      - name: "cm: install"
         run: sudo cmake --build _cmbuild --target install DESTDIR=$PWD/_dest-cm
-      - name: cm: list installed files
+      - name: "cm: list installed files"
         run: find _dest-cm | env LC_ALL=C sort | sed 's|^__dest-cm||'
 
   linux:
@@ -102,7 +102,7 @@ jobs:
           automake
           libtool
           crossbuild-essential-${{matrix.arch}}
-      - name: cm: configure
+      - name: "cm: configure"
         run: >-
           cmake
           -D DEBUG_CMAKE=1
@@ -114,9 +114,9 @@ jobs:
           -D CMAKE_INCLUDE_PATH=/usr/include/${{matrix.inc-lib}}
           -D CMAKE_LIBRARY_PATH=/usr/lib/${{matrix.inc-lib}}
           -B build
-      - name: cm: build
+      - name: "cm: build"
         run: cmake --build build
-      - name: at: configure
+      - name: "at: configure"
         run: >-
           ./autogen.sh
 
@@ -124,11 +124,11 @@ jobs:
 
           ../configure
           --prefix=/usr/local
-      - name: at: build
+      - name: "at: build"
         run: make -C _build-at -j$(nproc)
-      - name: at: install
+      - name: "at: install"
         run: sudo make -C _build-at install DESTDIR=$PWD/_d
-      - name: at: list installed files
+      - name: "at: list installed files"
         run: find _dest-at | env LC_ALL=C sort | sed 's|^__dest-at||'
 
   macos-x86_64:
