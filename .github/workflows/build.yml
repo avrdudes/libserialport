@@ -74,7 +74,7 @@ jobs:
       - name: "cm: install"
         run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
       - name: "cm: list installed files"
-        run: find _dest-cm | env LC_ALL=C sort | sed 's|^__dest-cm||'
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
 
   linux:
     runs-on: ubuntu-latest
@@ -127,9 +127,9 @@ jobs:
       - name: "at: build"
         run: make -C _build-at -j$(nproc)
       - name: "at: install"
-        run: make -C _build-at install DESTDIR=$PWD/_d
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
       - name: "at: list installed files"
-        run: find _dest-at | env LC_ALL=C sort | sed 's|^__dest-at||'
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
 
   macos-x86_64:
     runs-on: macos-latest
