@@ -21,6 +21,8 @@ Release/
 x64/
 *.vcxproj.user
 
+/_amb-w64/
+/_amd-w64/
 /_amb/
 /_amd/
 /_cmb/
