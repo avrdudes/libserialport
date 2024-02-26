@@ -1,4 +1,6 @@
+# ======================================================================
 # @configure_input@
+# ======================================================================
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -11,11 +13,13 @@ project(@PACKAGE_TARNAME@
 
 include(GNUInstallDirs)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED True)
-
-configure_file(cmake-config.h.in config.h)
-configure_file(libserialport.pc.in libserialport.pc)
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/libserialport.pc.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libserialport.pc"
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libserialport.pc"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
 
 if     (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(LSP_SOURCES "macosx.c")
@@ -31,16 +35,32 @@ else()
     "${CMAKE_PROJECT_NAME} does not support this system: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+set(SP_API "__attribute__\(\(visibility\(\"default\"\)\)\)")
+set(SP_PRIV "__attribute__\(\(visibility\(\"hidden\"\)\)\)")
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake-config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
+
 add_library(libserialport SHARED
   ${LSP_SOURCES}
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
+
+target_compile_features(libserialport PRIVATE c_std_99)
+set_target_properties(libserialport PROPERTIES C_EXTENSIONS OFF)
+
+target_compile_definitions(libserialport
+  PRIVATE LIBSERIALPORT_ATBUILD
 )
 
 target_include_directories(libserialport
   PUBLIC
-  "${PROJECT_SOURCE_DIR}"
   "${PROJECT_BINARY_DIR}"
-  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${PROJECT_SOURCE_DIR}"
   "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 set_target_properties(libserialport PROPERTIES
@@ -54,8 +74,4 @@ install(TARGETS libserialport
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   PUBLIC_HEADER DESTINATION include COMPONENT dev
-)
-
-install(FILES "libserialport.pc"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )

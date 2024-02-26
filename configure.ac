@@ -148,15 +148,13 @@ sp_sed_command_add([PACKAGE_VERSION], [AC_PACKAGE_VERSION])dnl
 sp_sed_command_add([PACKAGE_URL],     [AC_PACKAGE_URL])dnl
 dnl
 dnl TODO: Make sure the _minor and _micro values are calculcated correctly.
-m4_define([cmake_lib_version_major], [m4_eval(sp_lib_version_current, sp_lib_version_age)])dnl
+m4_define([cmake_lib_version_major], [m4_eval(sp_lib_version_current - sp_lib_version_age)])dnl
 m4_define([cmake_lib_version_minor], [sp_lib_version_age])dnl
 m4_define([cmake_lib_version_micro], [sp_lib_version_revision])dnl
-m4_define([cmake_lib_version], sp_lib_version_major.sp_lib_version_minor.sp_lib_version_micro)dnl
+m4_define([cmake_lib_version], m4_defn([cmake_lib_version_major]).m4_defn([cmake_lib_version_minor]).m4_defn([cmake_lib_version_micro]))dnl
 sp_sed_command_add([CMAKE_LIB_SOVERSION], [cmake_lib_version_major])dnl
 sp_sed_command_add([CMAKE_LIB_VERSION],   [cmake_lib_version])dnl
 dnl
-AC_SUBST([LIBGPHOTO2_CURRENT_MIN],
-         [`expr $LIBGPHOTO2_CURRENT - $LIBGPHOTO2_AGE`])
 
 m4_esyscmd([./buildstuff/sed-substitute CMakeLists.txt.in]m4_defn([sp_sed_command_args]))dnl
 m4_case(m4_sysval, [0], [], [dnl

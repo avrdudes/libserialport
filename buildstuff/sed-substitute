@@ -48,7 +48,7 @@ esac
 tmpname="$outname.tmp.$$"
 
 
-${SED-sed} -e "s|[@]configure_input[@]|$outname.  Generated from $inname by configure.ac.|g" "$@" < "$inname" > "$tmpname" || {
+${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1DO NOT MODIFY THIS FILE. EDIT $inname INSTEAD.|g" "$@" < "$inname" > "$tmpname" || {
     s="$?"
     echo "$prog: Error running sed, exit code $s."
     rm -f "$tmpname"
@@ -68,13 +68,16 @@ if test -f "$outname"; then
 	exit 0
     else
 	${DIFF-diff} -u "$outname" "$tmpname" >&2 ||:
+	chmod +w "$outname"
 	mv -f "$tmpname" "$outname"
+	chmod -w "$outname"
 	echo "$prog: source file has been updated: $outname" >&2
 	echo "$prog: commit the file, and then re-run autoreconf." >&2
 	exit 1
     fi
 else
     mv -f "$tmpname" "$outname"
+    chmod -w "$outname"
     echo "$prog: created new source file: $outname" >&2
     echo "$prog: commit the file, and then re-run autoreconf." >&2
     exit 1
