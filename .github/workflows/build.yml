@@ -46,10 +46,11 @@ jobs:
           cmake
           automake
           libtool
-      - name: "at: configure"
+      - name: "at: autoreconf"
         run: >-
           ./autogen.sh
-
+      - name: "at: configure"
+        run: >-
           mkdir _build-at && cd _build-at
 
           ../configure
@@ -114,10 +115,11 @@ jobs:
           -B build
       - name: "cm: build"
         run: cmake --build build
-      - name: "at: configure"
+      - name: "at: autoreconf"
         run: >-
           ./autogen.sh
-
+      - name: "at: configure"
+        run: >-
           mkdir _build-at && cd _build-at
 
           ../configure
