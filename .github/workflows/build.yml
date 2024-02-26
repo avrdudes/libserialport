@@ -141,7 +141,7 @@ jobs:
 
           brew install
           cmake
-      - name: Configure
+      - name: "cm: configure"
         run: >-
           cmake
           -D CMAKE_C_FLAGS=-I/usr/local/include
@@ -149,7 +149,7 @@ jobs:
           -D DEBUG_CMAKE=1
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -B build
-      - name: Build
+      - name: "cm: build"
         run: cmake --build build
 
   msvc:
@@ -162,7 +162,7 @@ jobs:
           - { arch: arm64, platform: ARM64 }
     steps:
       - uses: actions/checkout@v3
-      - name: Configure
+      - name: "cm: configure"
         run: >-
           cmake
           -A ${{matrix.platform}}
@@ -172,7 +172,7 @@ jobs:
           -D CMAKE_CXX_FLAGS_RELWITHDEBINFO="/MT /GL /Zi /O2 /Ob1 /DNDEBUG"
           -D CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="/DEBUG /INCREMENTAL:NO /LTCG /OPT:REF /OPT:ICF"
           -B build
-      - name: Build
+      - name: "cm: build"
         run: cmake --build build --config ${{env.BUILD_TYPE}}
 
   mingw:
@@ -198,12 +198,12 @@ jobs:
             mingw-w64-${{matrix.env}}-cmake
             automake1.16
             mingw-w64-${{matrix.env}}-libtool
-      - name: Configure
+      - name: "cm: configure"
         run: >-
           cmake
           -G"MSYS Makefiles"
           -D DEBUG_CMAKE=1
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -B build
-      - name: Build
+      - name: "cm: build"
         run: cmake --build build
