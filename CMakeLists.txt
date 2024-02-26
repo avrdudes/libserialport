@@ -37,12 +37,25 @@ else()
     "${CMAKE_PROJECT_NAME} does not support this system: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-set(SP_API "__attribute__\(\(visibility\(\"default\"\)\)\)")
-set(SP_PRIV "__attribute__\(\(visibility\(\"hidden\"\)\)\)")
-set(SP_API "__declspec(dllexport)")
-set(SP_PRIV "")
-set(SP_API "")
-set(SP_PRIV "")
+set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
+try_compile(VISIBILITY_CONTROL_ATTRIBUTE
+  "${PROJECT_BINARY_DIR}/bindir1"
+  "${CMAKE_CURRENT_SOURCE_DIR}/test-visibility-control-attribute.c"
+)
+try_compile(VISIBILITY_CONTROL_DECLSPEC
+  "${PROJECT_BINARY_DIR}/bindir2"
+  "${CMAKE_CURRENT_SOURCE_DIR}/test-visibility-control-declspec.c"
+)
+if(VISIBILITY_CONTROL_ATTRIBUTE)
+  set(SP_API  "__attribute__((visibility(\"default\")))")
+  set(SP_PRIV "__attribute__((visibility(\"hidden\")))")
+elseif(VISIBILITY_CONTROL_DECLSPEC)
+  set(SP_API  "__declspec(dllexport)")
+  set(SP_PRIV "")
+else()
+  set(SP_API  "")
+  set(SP_PRIV "")
+endif()
 
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake-config.h.in"
