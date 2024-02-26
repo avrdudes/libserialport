@@ -65,20 +65,20 @@ if test -f "$outname"; then
     if ${CMP-cmp} "$outname" "$tmpname" > /dev/null; then
 	# echo "$prog: source file up to date: $outname" >&2
 	rm -f "$tmpname"
-	chmod -w "$outname"
+	${CHMOD-chmod} a-w "$outname"
 	exit 0
     else
 	${DIFF-diff} -u "$outname" "$tmpname" >&2 ||:
-	chmod +w "$outname"
+	${CHMOD-chmod} +w "$outname"
 	mv -f "$tmpname" "$outname"
-	chmod -w "$outname"
+	${CHMOD-chmod} a-w "$outname"
 	echo "$prog: source file has been updated: $outname" >&2
 	echo "$prog: commit the file, and then re-run autoreconf." >&2
 	exit 1
     fi
 else
     mv -f "$tmpname" "$outname"
-    chmod -w "$outname"
+    ${CHMOD-chmod} a-w "$outname"
     echo "$prog: created new source file: $outname" >&2
     echo "$prog: commit the file, and then re-run autoreconf." >&2
     exit 1
