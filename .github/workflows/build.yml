@@ -194,7 +194,7 @@ jobs:
             base-devel
             mingw-w64-${{matrix.env}}-gcc
             mingw-w64-${{matrix.env}}-cmake
-            mingw-w64-${{matrix.env}}-automake
+            automake1.16
             mingw-w64-${{matrix.env}}-libtool
       - name: Configure
         run: >-
