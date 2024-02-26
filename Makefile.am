@@ -153,3 +153,5 @@ if HAVE_PROG_DOXYGEN
 doc: $(srcdir)/libserialport.h Doxyfile
 	doxygen `test -f Doxyfile || echo '$(srcdir)/'`Doxyfile
 endif
+
+EXTRA_DIST += windows.rc.in
