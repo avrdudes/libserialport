@@ -48,7 +48,7 @@ jobs:
           mkdir _atbuild && cd _atbuild
 
           ../configure
-          --prefix=/usr
+          --prefix=/usr/local
       - name: Build
         run: make -C _atbuild -j$(nproc)
       - name: Install
@@ -73,7 +73,7 @@ jobs:
         run: >-
           cmake
           -B build
-          -D CMAKE_INSTALL_PREFIX:PATH=/usr
+          -D CMAKE_INSTALL_PREFIX:PATH=/usr/local
       - name: Build
         run: cmake --build build
       - name: Install
