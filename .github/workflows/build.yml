@@ -48,15 +48,15 @@ jobs:
           mkdir _atbuild && cd _atbuild
 
           ../configure
-          --prefix=$PWD/../_amprefix
+          --prefix=/usr
       - name: Build
         run: make -C _atbuild -j$(nproc)
       - name: Install
-        run: sudo make -C _atbuild install
+        run: sudo make -C _atbuild install DESTDIR=$PWD/_d
+      - name: List installed files
+        run: find _d | env LC_ALL=C sort | sed 's|^_d||'
       - name: distcheck
         run: make -C _atbuild -j$(nproc) distcheck
-      - name: List installed files
-        run: find _amprefix | env LC_ALL=C sort
 
   linux-x86_64-cmake:
     runs-on: ubuntu-latest
@@ -68,14 +68,15 @@ jobs:
 
           sudo apt-get install -y
           build-essential
-          cmake -D CMAKE_INSTALL_PREFIX:PATH=$PWD/_cmprefix
+          cmake
       - name: Configure
         run: >-
           cmake
           -B build
+          -D CMAKE_INSTALL_PREFIX:PATH=/usr
       - name: Build
         run: cmake --build build
       - name: Install
-        run: sudo cmake --build build --target install
+        run: sudo cmake --build build --target install DESTDIR=$PWD/_d
       - name: List installed files
-        run: find _cmprefix | env LC_ALL=C sort
+        run: find _d | env LC_ALL=C sort | sed 's|^_d||'
