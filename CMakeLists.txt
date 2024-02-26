@@ -1,11 +1,11 @@
-# @configure_input@
+# CMakeLists.txt.  Generated from CMakeLists.txt.in by configure.ac.
 
 cmake_minimum_required(VERSION 3.14)
 
 project(libserialport
-  VERSION "@PACKAGE_VERSION@"
-  DESCRIPTION "@PACKAGE_NAME@"
-  HOMEPAGE_URL "@PACKAGE_URL@"
+  VERSION "0.1.1.23"
+  DESCRIPTION "avrdudes bugfix fork of sigrok libserialport"
+  HOMEPAGE_URL "https://github.com/avrdudes/libserialport"
   LANGUAGES C
 )
 
@@ -46,8 +46,8 @@ target_include_directories(libserialport
 set_target_properties(libserialport PROPERTIES
   PREFIX ""
   PUBLIC_HEADER "libserialport.h"
-  VERSION @CMAKE_LIB_VERSION@
-  SOVERSION @CMAKE_LIB_SOVERSION@
+  VERSION sp_lib_version_major.sp_lib_version_minor.sp_lib_version_micro
+  SOVERSION 1
 )
 
 install(TARGETS libserialport

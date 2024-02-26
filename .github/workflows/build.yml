@@ -1,0 +1,81 @@
+#
+# build.yml - GitHub build action for libserialport adapted from AVRDUDE
+# Copyright (C) 2021 Marius Greuel
+# Copyright (C) 2024 Hans Ulrich Niedermann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+name: Build
+
+on:
+  push:
+    branches-ignore:
+      - 'onlinedocs'
+  pull_request:
+    branches-ignore:
+      - 'onlinedocs'
+  workflow_call:
+
+jobs:
+  linux-x86_64-autotools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install prerequisites
+        run: >-
+          sudo apt-get update
+
+          sudo apt-get install -y
+          build-essential
+          automake
+          libtool
+      - name: Configure
+        run: >-
+          ./autogen.sh
+
+          mkdir _atbuild && cd _atbuild
+
+          ../configure
+          --prefix=$PWD/../_amprefix
+      - name: Build
+        run: make -C _atbuild -j$(nproc)
+      - name: Install
+        run: sudo make -C _atbuild install
+      - name: distcheck
+        run: make -C _atbuild -j$(nproc) distcheck
+      - name: List installed files
+        run: find _amprefix | env LC_ALL=C sort
+
+  linux-x86_64-cmake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install prerequisites
+        run: >-
+          sudo apt-get update
+
+          sudo apt-get install -y
+          build-essential
+          cmake -D CMAKE_INSTALL_PREFIX:PATH=$PWD/_cmprefix
+      - name: Configure
+        run: >-
+          cmake
+          -B build
+      - name: Build
+        run: cmake --build build
+      - name: Install
+        run: sudo cmake --build build --target install
+      - name: List installed files
+        run: find _cmprefix | env LC_ALL=C sort
