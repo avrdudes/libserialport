@@ -1,6 +1,7 @@
 # ======================================================================
 # CMakeLists.txt.  Generated from CMakeLists.txt.in by configure.ac.
-# DO NOT MODIFY THIS FILE. EDIT CMakeLists.txt.in INSTEAD.
+# !!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!
+# EDIT CMakeLists.txt.in INSTEAD AND RE-RUN autoreconf.
 # ======================================================================
 
 cmake_minimum_required(VERSION 3.14)

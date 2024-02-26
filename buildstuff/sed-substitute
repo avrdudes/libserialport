@@ -48,7 +48,7 @@ esac
 tmpname="$outname.tmp.$$"
 
 
-${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1DO NOT MODIFY THIS FILE. EDIT $inname INSTEAD.|g" "$@" < "$inname" > "$tmpname" || {
+${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1!!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!\n\1EDIT $inname INSTEAD AND RE-RUN autoreconf.|g" "$@" < "$inname" > "$tmpname" || {
     s="$?"
     echo "$prog: Error running sed, exit code $s."
     rm -f "$tmpname"
