@@ -32,7 +32,8 @@ env:
   BUILD_TYPE: RelWithDebInfo
 
 jobs:
-  linux-x86_64-autotools:
+
+  linux-x86_64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -42,48 +43,39 @@ jobs:
 
           sudo apt-get install -y
           build-essential
+          cmake
           automake
           libtool
-      - name: Configure
+      - name: at: configure
         run: >-
           ./autogen.sh
 
-          mkdir _atbuild && cd _atbuild
+          mkdir _build-at && cd _build-at
 
           ../configure
           --prefix=/usr/local
-      - name: Build
-        run: make -C _atbuild -j$(nproc)
-      - name: Install
-        run: sudo make -C _atbuild install DESTDIR=$PWD/_d
-      - name: List installed files
-        run: find _d | env LC_ALL=C sort | sed 's|^_d||'
+      - name: at: build
+        run: make -C _build-at -j$(nproc)
+      - name: at: install
+        run: sudo make -C _build-at install DESTDIR=$PWD/_d
+      - name: at: list installed files
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^__dest-at||'
       - name: distcheck
         run: make -C _atbuild -j$(nproc) distcheck
-
-  linux-x86_64-cmake:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install prerequisites
+      - name: cm: configure
         run: >-
-          sudo apt-get update
+          cd ..
 
-          sudo apt-get install -y
-          build-essential
           cmake
-      - name: Configure
-        run: >-
-          cmake
-          -B build
+          -B _build-cm
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -D CMAKE_INSTALL_PREFIX:PATH=/usr/local
-      - name: Build
-        run: cmake --build build
-      - name: Install
-        run: sudo cmake --build build --target install DESTDIR=$PWD/_d
-      - name: List installed files
-        run: find _d | env LC_ALL=C sort | sed 's|^_d||'
+      - name: cm: build
+        run: cmake --build _build-cm
+      - name: cm: install
+        run: sudo cmake --build _cmbuild --target install DESTDIR=$PWD/_dest-cm
+      - name: cm: list installed files
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^__dest-cm||'
 
   linux:
     runs-on: ubuntu-latest
@@ -107,8 +99,10 @@ jobs:
           apt-get install -y
           git
           cmake
+          automake
+          libtool
           crossbuild-essential-${{matrix.arch}}
-      - name: Configure
+      - name: cm: configure
         run: >-
           cmake
           -D DEBUG_CMAKE=1
@@ -120,8 +114,22 @@ jobs:
           -D CMAKE_INCLUDE_PATH=/usr/include/${{matrix.inc-lib}}
           -D CMAKE_LIBRARY_PATH=/usr/lib/${{matrix.inc-lib}}
           -B build
-      - name: Build
+      - name: cm: build
         run: cmake --build build
+      - name: at: configure
+        run: >-
+          ./autogen.sh
+
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: at: build
+        run: make -C _build-at -j$(nproc)
+      - name: at: install
+        run: sudo make -C _build-at install DESTDIR=$PWD/_d
+      - name: at: list installed files
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^__dest-at||'
 
   macos-x86_64:
     runs-on: macos-latest
@@ -188,6 +196,8 @@ jobs:
             base-devel
             mingw-w64-${{matrix.env}}-gcc
             mingw-w64-${{matrix.env}}-cmake
+            mingw-w64-${{matrix.env}}-automake
+            mingw-w64-${{matrix.env}}-libtool
       - name: Configure
         run: >-
           cmake
