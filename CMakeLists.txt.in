@@ -37,6 +37,10 @@ endif()
 
 set(SP_API "__attribute__\(\(visibility\(\"default\"\)\)\)")
 set(SP_PRIV "__attribute__\(\(visibility\(\"hidden\"\)\)\)")
+set(SP_API "__declspec(dllexport)")
+set(SP_PRIV "")
+set(SP_API "")
+set(SP_PRIV "")
 
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake-config.h.in"
