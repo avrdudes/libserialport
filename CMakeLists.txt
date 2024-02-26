@@ -88,10 +88,20 @@ add_library(libserialport SHARED
   ${EXTRA_WINDOWS_RESOURCES}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(EXTRA_MACOS_LIBRARIES
+    "-framework IOKit"
+    "-framework CoreFoundation"
+  )
+else()
+  set(EXTRA_MACOS_LIBRARIES)
+endif()
+
 target_compile_features(libserialport PRIVATE c_std_99)
 target_link_libraries(libserialport
   PUBLIC
   ${EXTRA_WINDOWS_LIBRARIES}
+  ${EXTRA_MACOS_LIBRARIES}
 )
 set_target_properties(libserialport PROPERTIES C_EXTENSIONS OFF)
 
