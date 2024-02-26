@@ -20,3 +20,8 @@ Debug/
 Release/
 x64/
 *.vcxproj.user
+
+/_amb/
+/_amd/
+/_cmb/
+/_cmd/
