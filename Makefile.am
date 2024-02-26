@@ -150,6 +150,6 @@ DISTCLEANFILES = ChangeLog
 dist-hook: ChangeLog
 
 if HAVE_PROG_DOXYGEN
-doc: $(include_HEADERS) $(top_srcdir)/Doxyfile
-	doxygen $(top_srcdir)/Doxyfile
+doc: $(srcdir)/libserialport.h Doxyfile
+	doxygen `test -f Doxyfile || echo '$(srcdir)/'`Doxyfile
 endif

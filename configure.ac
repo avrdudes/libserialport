@@ -232,7 +232,7 @@ AS_CASE([$sp_cv_visibility_control],
 AC_DEFINE_UNQUOTED([SP_API], [$SP_API], [Macro preceding public API functions])
 AC_DEFINE_UNQUOTED([SP_PRIV], [$SP_PRIV], [Macro preceding private functions])
 
-AC_CONFIG_FILES([Makefile libserialport.pc])
+AC_CONFIG_FILES([Doxyfile Makefile libserialport.pc])
 
 AC_OUTPUT
 
