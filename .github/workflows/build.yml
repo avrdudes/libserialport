@@ -71,7 +71,7 @@ jobs:
       - name: "cm: build"
         run: cmake --build _build-cm
       - name: "cm: install"
-        run: cmake --build _cmbuild --target install DESTDIR=$PWD/_dest-cm
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
       - name: "cm: list installed files"
         run: find _dest-cm | env LC_ALL=C sort | sed 's|^__dest-cm||'
 
