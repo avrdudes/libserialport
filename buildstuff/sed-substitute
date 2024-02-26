@@ -65,6 +65,7 @@ if test -f "$outname"; then
     if ${CMP-cmp} "$outname" "$tmpname" > /dev/null; then
 	# echo "$prog: source file up to date: $outname" >&2
 	rm -f "$tmpname"
+	chmod -w "$outname"
 	exit 0
     else
 	${DIFF-diff} -u "$outname" "$tmpname" >&2 ||:
