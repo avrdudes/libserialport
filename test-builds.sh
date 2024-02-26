@@ -57,6 +57,13 @@ then
   cd ..
 fi
 
+if find_in_path mingw64-cmake
+then
+    mingw64-cmake -S . -B _cmb-w64
+    make -C _cmb-w64 -j$(nproc)
+    make -C _cmb-w64 install DESTDIR="$PWD/_cmd-w64"
+fi
+
 cd _amb
 make -j$(nproc) doc
 make -j$(nproc) distcheck
@@ -75,3 +82,12 @@ diff -u \
      <(find _amd-w64 -not -type d | env LC_ALL=C sort | sed 's|^_amd-w64||' | sed 's|^/usr/x86_64-w64-mingw32/sys-root/mingw||') \
 ||:
 
+diff -u \
+     <(find _amd-w64 | env LC_ALL=C sort | sed 's|^_amd-w64||') \
+     <(find _cmd-w64 | env LC_ALL=C sort | sed 's|^_cmd-w64||') \
+||:
+
+diff -u _{am,cm}d-w64/lib/pkgconfig/libserialport.pc \
+||:
+
+# End of file.
