@@ -33,6 +33,9 @@
  *
  * libserialport is an open source project released under the LGPL3+ license.
  *
+ * **This is a fork of upstream libserialport for integration with avrdude
+ * and fixing bugs and collecting patches to feed back to upstream.**
+ *
  * The library is maintained by the [sigrok](http://sigrok.org/) project. See
  * the [libserialport homepage](http://sigrok.org/wiki/Libserialport) for the
  * latest information.

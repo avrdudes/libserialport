@@ -2,6 +2,12 @@
 libserialport: cross-platform library for accessing serial ports
 -------------------------------------------------------------------------------
 
+    /---------------------------------\
+    | THIS IS A FORK OF libserialport |
+    | FOR THE avrdude PROJECT TO HELP |
+    | COLLECT FIXES TO FEED UPSTREAM. |
+    \---------------------------------/
+
 libserialport is a minimal library written in C that is intended to take care
 of the OS-specific details when writing software that uses serial ports.
 
