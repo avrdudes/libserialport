@@ -117,21 +117,8 @@ EXTRA_DIST += examples/send_receive.c
 EXTRA_DIST += examples/projects/send_receive.vcxproj
 EXTRA_DIST += examples/projects/send_receive.vcxproj.filters
 
-SED_CMDS =
-SED_CMDS += -e 's|[@]PACKAGE_TARNAME[@]|$(PACKAGE_TARNAME)|g'
-SED_CMDS += -e 's|[@]PACKAGE_TARNAME[@]|$(PACKAGE_TARNAME)|g'
-
 EXTRA_DIST += CMakeLists.txt.in
 EXTRA_DIST += $(srcdir)/CMakeLists.txt
-noinst_DATA += $(srcdir)/CMakeLists.txt
-$(srcdir)/CMakeLists.txt: CMakeLists.txt.in
-	if $(SED) $(SED_CMDS) $< > $@.tmp.$$$$; then \
-	  mv -f "$@.tmp.$$$$" "$@"; \
-	else \
-	  s="$?"; \
-	  rm -f "$@.tmp.$$$$"; \
-	  exit "$s"; \
-	fi
 
 .PHONY: ChangeLog doc
 
