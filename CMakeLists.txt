@@ -113,6 +113,12 @@ target_compile_definitions(libserialport
   PRIVATE LIBSERIALPORT_ATBUILD
 )
 
+if(MSVC OR MINGW)
+  target_compile_definitions(libserialport
+    PRIVATE LIBSERIALPORT_MSBUILD
+  )
+endif()
+
 target_include_directories(libserialport
   PUBLIC
   "${PROJECT_BINARY_DIR}"
