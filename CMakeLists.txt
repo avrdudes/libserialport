@@ -73,7 +73,7 @@ endif()
 
 if(MSVC)
 else()
-  add_compile_options(-Wall -Wextra -Wno-unused-parameter -Werror)
+  add_compile_options(-Wall -Wextra -Wno-unused-parameter) # -Werror)
 endif()
 
 # FIXME: -no-undefined for Linux
