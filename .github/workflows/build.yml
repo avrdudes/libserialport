@@ -228,7 +228,7 @@ jobs:
         run: >-
           ACV=-2.72
 
-          AMC=-1.16
+          AMV=-1.16
 
           env ACLOCAL=aclocal$AMV AUTOMAKE=automake$AMV AUTORECONF=autoreconf$ACV AUTOCONF=autoconf$ACV AUTOM4TE=autom4te$ACV AUTOHEADER=autoheader$ACV ./autogen.sh
       - name: "at: configure"
