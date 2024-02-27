@@ -74,6 +74,8 @@ else()
   add_compile_options(-Wall -Wextra -Wno-unused-parameter -Werror)
 endif()
 
+# FIXME: -no-undefined for Linux
+
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake-config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"

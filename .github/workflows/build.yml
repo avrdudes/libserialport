@@ -112,9 +112,13 @@ jobs:
           -D CMAKE_FIND_ROOT_PATH=/usr/${{matrix.prefix}}
           -D CMAKE_INCLUDE_PATH=/usr/include/${{matrix.inc-lib}}
           -D CMAKE_LIBRARY_PATH=/usr/lib/${{matrix.inc-lib}}
-          -B build
+          -B _build-cm
       - name: "cm: build"
-        run: cmake --build build
+        run: cmake --build _build-cm
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
       - name: "at: autoreconf"
         run: >-
           ./autogen.sh
@@ -148,9 +152,13 @@ jobs:
           -D CMAKE_EXE_LINKER_FLAGS=-L/usr/local/Cellar
           -D DEBUG_CMAKE=1
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          -B build
+          -B _build-cm
       - name: "cm: build"
-        run: cmake --build build --verbose
+        run: cmake --build _build-cm --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
 
   msvc:
     runs-on: windows-latest
@@ -171,9 +179,13 @@ jobs:
           -D CMAKE_C_FLAGS_RELWITHDEBINFO="/MT /GL /Zi /O2 /Ob1 /DNDEBUG"
           -D CMAKE_CXX_FLAGS_RELWITHDEBINFO="/MT /GL /Zi /O2 /Ob1 /DNDEBUG"
           -D CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="/DEBUG /INCREMENTAL:NO /LTCG /OPT:REF /OPT:ICF"
-          -B build
+          -B _build-cm
       - name: "cm: build"
-        run: cmake --build build --config ${{env.BUILD_TYPE}} --verbose
+        run: cmake --build _build-cm --config ${{env.BUILD_TYPE}} --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
 
   mingw:
     runs-on: windows-latest
@@ -204,6 +216,25 @@ jobs:
           -G"MSYS Makefiles"
           -D DEBUG_CMAKE=1
           -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          -B build
+          -B _build-cm
       - name: "cm: build"
-        run: cmake --build build --verbose
+        run: cmake --build _build-cm --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+      - name: "at: autoreconf"
+        run: >-
+          ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
