@@ -47,7 +47,7 @@ esac
 
 tmqname="$outname.tmq.$$"
 
-${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1!!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!\n\1EDIT $inname INSTEAD AND RE-RUN autoreconf.|g" "$@" < "$inname" > "$tmqname" || {
+${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1======================================================================\n\1$outname.  Generated from $inname by configure.ac.\n\1======================================================================\n\1!!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!\n\1======================================================================\n\1EDIT $inname INSTEAD AND RE-RUN autoreconf/autogen.sh\n\1======================================================================|g" "$@" < "$inname" > "$tmqname" || {
     s="$?"
     echo "$prog: Error running sed, exit code $s." >&2
     rm -f "$tmqname"
