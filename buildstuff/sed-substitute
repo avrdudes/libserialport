@@ -62,7 +62,7 @@ fi
 
 tmpname="$outname.tmp.$$"
 
-${TR-tr} -d '\015' < "$tmqname" > "$tmpname" || {
+cat < "$tmqname" > "$tmpname" || {
     s="$?"
     echo "$prog: Error running tr, exit code $s" >&2
     rm -f "$tmqname"

@@ -32,7 +32,7 @@ ${SED-sed} "$@" < "$fname" > "$qname" || {
     exit 2
 }
 
-${TR-tr} -d '\015' < "$qname" > "$tname" || {
+cat < "$qname" > "$tname" || {
     s="$?"
     echo "$prog: Error running tr, exit code $s" >&2
     rm -f "$qname" "$tname"
