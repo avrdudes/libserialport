@@ -145,6 +145,9 @@ jobs:
 
           brew install
           cmake
+          automake
+          autoconf
+          libtool
       - name: "cm: configure"
         run: >-
           cmake
@@ -159,6 +162,21 @@ jobs:
         run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
       - name: "cm: list installed files"
         run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+      - name: "at: autoreconf"
+        run: >-
+          ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
 
   msvc:
     runs-on: windows-latest
