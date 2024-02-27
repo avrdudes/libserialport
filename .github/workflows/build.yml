@@ -201,9 +201,10 @@ jobs:
       - name: "cm: build"
         run: cmake --build _build-cm --config ${{env.BUILD_TYPE}} --verbose
       - name: "cm: install"
-        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
-      - name: "cm: list installed files"
-        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+        run: cmake --build _build-cm --target install
+
+      # This is running in powershell, not sh. Therefore find, env,
+      # sort do not work as usual.
 
   mingw:
     runs-on: windows-latest
