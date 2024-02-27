@@ -23,14 +23,22 @@ test -f "$fname" || {
 }
 
 tname="$fname.tmp.$$"
+qname="$fname.tmq.$$"
 
-
-${SED-sed} "$@" < "$fname" > "$tname" || {
+${SED-sed} "$@" < "$fname" > "$qname" || {
     s="$?"
-    echo "$prog: Error running sed, exit code $s." >&2
-    rm -f "$tname"
+    echo "$prog: Error running sed, exit code $s" >&2
+    rm -f "$qname"
     exit 2
 }
+
+${TR-tr} -d '\015' < "$qname" > "$tname" || {
+    s="$?"
+    echo "$prog: Error running tr, exit code $s" >&2
+    rm -f "$qname" "$tname"
+    exit 2
+}
+rm -f "$qname"
 
 test -s "$tname" || {
     echo "$prog: sed has produced an empty file" >&2

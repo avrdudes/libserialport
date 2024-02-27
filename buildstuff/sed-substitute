@@ -45,21 +45,30 @@ case "$outname" in
 	;;
 esac
 
-tmpname="$outname.tmp.$$"
+tmqname="$outname.tmq.$$"
 
-
-${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1!!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!\n\1EDIT $inname INSTEAD AND RE-RUN autoreconf.|g" "$@" < "$inname" > "$tmpname" || {
+${SED-sed} -e "s|^\(.*\)[@]configure_input[@]|\1$outname.  Generated from $inname by configure.ac.\n\1!!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!\n\1EDIT $inname INSTEAD AND RE-RUN autoreconf.|g" "$@" < "$inname" > "$tmqname" || {
     s="$?"
-    echo "$prog: Error running sed, exit code $s."
-    rm -f "$tmpname"
+    echo "$prog: Error running sed, exit code $s." >&2
+    rm -f "$tmqname"
     exit 2
 }
 
-if grep '[@][A-Za-z0-9_-]\{1,\}@' "$tmpname" >&2; then
+if grep '[@][A-Za-z0-9_-]\{1,\}@' "$tmqname" >&2; then
     echo "$prog: Unsubstituted values found while substituting $inname" >&2
-    rm -f "$tmpname"
+    rm -f "$tmqname"
     exit 2
 fi
+
+tmpname="$outname.tmp.$$"
+
+${TR-tr} -d '\015' < "$tmqname" > "$tmpname" || {
+    s="$?"
+    echo "$prog: Error running tr, exit code $s" >&2
+    rm -f "$tmqname"
+    exit 2
+}
+rm -f "$tmqname"
 
 if test -f "$outname"; then
     if ${CMP-cmp} "$outname" "$tmpname" > /dev/null; then
