@@ -226,7 +226,7 @@ jobs:
         run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
       - name: "at: autoreconf"
         run: >-
-          ./autogen.sh
+          env ACLOCAL=aclocal1.16 ./autogen.sh
       - name: "at: configure"
         run: >-
           mkdir _build-at && cd _build-at
