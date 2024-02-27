@@ -36,7 +36,7 @@ jobs:
   linux-x86_64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install prerequisites
         run: >-
           sudo apt-get update
@@ -86,7 +86,7 @@ jobs:
           - { arch: armhf, processor: armhf, prefix: arm-linux-gnueabihf, inc-lib: arm-linux-gnueabihf }
           - { arch: arm64, processor: aarch64, prefix: aarch64-linux-gnu, inc-lib: aarch64-linux-gnu }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Add architecture
         run: |
           dpkg --add-architecture ${{matrix.arch}}
@@ -138,7 +138,7 @@ jobs:
   macos-x86_64:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install prerequisites
         run: >-
           # brew update
@@ -169,7 +169,7 @@ jobs:
           - { arch: x64, platform: x64 }
           - { arch: arm64, platform: ARM64 }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: "cm: configure"
         run: >-
           cmake
@@ -199,7 +199,7 @@ jobs:
           - { sys: ucrt64, env: ucrt-x86_64 }
           - { sys: clang64, env: clang-x86_64 }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
