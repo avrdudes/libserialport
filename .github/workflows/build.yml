@@ -209,7 +209,7 @@ jobs:
             mingw-w64-${{matrix.env}}-gcc
             mingw-w64-${{matrix.env}}-cmake
             automake1.16
-            autoconf
+            autoconf2.72
             mingw-w64-${{matrix.env}}-libtool
       - name: "cm: configure"
         run: >-
