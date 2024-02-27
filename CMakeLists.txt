@@ -109,13 +109,13 @@ target_link_libraries(libserialport
 )
 set_target_properties(libserialport PROPERTIES C_EXTENSIONS OFF)
 
-target_compile_definitions(libserialport
-  PRIVATE LIBSERIALPORT_ATBUILD
-)
-
 if(MSVC OR MINGW)
   target_compile_definitions(libserialport
     PRIVATE LIBSERIALPORT_MSBUILD
+  )
+else()
+  target_compile_definitions(libserialport
+    PRIVATE LIBSERIALPORT_ATBUILD
   )
 endif()
 
