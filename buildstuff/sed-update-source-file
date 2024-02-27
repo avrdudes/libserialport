@@ -27,8 +27,13 @@ tname="$fname.tmp.$$"
 
 ${SED-sed} "$@" < "$fname" > "$tname" || {
     s="$?"
-    echo "$prog: Error running sed, exit code $s."
+    echo "$prog: Error running sed, exit code $s." >&2
     rm -f "$tname"
+    exit 2
+}
+
+test -s "$tname" || {
+    echo "$prog: sed has produced an empty file" >&2
     exit 2
 }
 
