@@ -26,7 +26,7 @@ if     (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
   set(LSP_SOURCES "freebsd.c")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(LSP_SOURCES "linux.c")
+  set(LSP_SOURCES linux.c linux_termios.c linux_termios.h)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(LSP_SOURCES "windows.c")
 else()
@@ -80,6 +80,8 @@ configure_file(
 )
 
 add_library(libserialport SHARED
+  serialport.c
+  timing.c
   ${LSP_SOURCES}
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
   ${EXTRA_WINDOWS_SOURCES}
