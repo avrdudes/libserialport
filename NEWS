@@ -1,3 +1,8 @@
+0.1.1.23 (2024-02-20)
+---------------------
+
+ * Fix some devices on OSX (make buffer large enough for OSX class string)
+
 0.1.1 (2016-01-27)
 ------------------
 

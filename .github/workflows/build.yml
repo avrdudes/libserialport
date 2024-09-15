@@ -1,0 +1,264 @@
+#
+# build.yml - GitHub build action for libserialport adapted from AVRDUDE
+# Copyright (C) 2021 Marius Greuel
+# Copyright (C) 2024 Hans Ulrich Niedermann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+name: Build
+
+on:
+  push:
+    branches-ignore:
+      - 'onlinedocs'
+  pull_request:
+    branches-ignore:
+      - 'onlinedocs'
+  workflow_call:
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+
+  linux-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites
+        run: >-
+          sudo apt-get update
+
+          sudo apt-get install -y
+          build-essential
+          cmake
+          automake
+          libtool
+      - name: "at: autoreconf"
+        run: >-
+          ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
+      - name: "at: distcheck"
+        run: make -C _build-at -j$(nproc) distcheck
+      - name: "cm: configure"
+        run: >-
+          cmake
+          -B _build-cm
+          -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -D CMAKE_INSTALL_PREFIX:PATH=/usr/local
+      - name: "cm: build"
+        run: cmake --build _build-cm
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+
+  linux:
+    runs-on: ubuntu-latest
+    container: debian:11
+    strategy:
+      matrix:
+        include:
+          - { arch: i386, processor: i686, prefix: i686-linux-gnu, inc-lib: i386-linux-gnu }
+          - { arch: armhf, processor: armhf, prefix: arm-linux-gnueabihf, inc-lib: arm-linux-gnueabihf }
+          - { arch: arm64, processor: aarch64, prefix: aarch64-linux-gnu, inc-lib: aarch64-linux-gnu }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add architecture
+        run: |
+          dpkg --add-architecture ${{matrix.arch}}
+          apt-get update
+      - name: Install prerequisites
+        run: >-
+          apt-get update
+
+          apt-get install -y
+          git
+          cmake
+          automake
+          libtool
+          crossbuild-essential-${{matrix.arch}}
+      - name: "cm: configure"
+        run: >-
+          cmake
+          -D DEBUG_CMAKE=1
+          -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -D CMAKE_SYSTEM_NAME=Linux
+          -D CMAKE_SYSTEM_PROCESSOR=${{matrix.processor}}
+          -D CMAKE_C_COMPILER=${{matrix.prefix}}-gcc
+          -D CMAKE_FIND_ROOT_PATH=/usr/${{matrix.prefix}}
+          -D CMAKE_INCLUDE_PATH=/usr/include/${{matrix.inc-lib}}
+          -D CMAKE_LIBRARY_PATH=/usr/lib/${{matrix.inc-lib}}
+          -B _build-cm
+      - name: "cm: build"
+        run: cmake --build _build-cm
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+      - name: "at: autoreconf"
+        run: >-
+          ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
+
+  macos-x86_64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites
+        run: >-
+          # brew update
+
+          brew install
+          cmake
+          automake
+          autoconf
+          libtool
+      - name: "cm: configure"
+        run: >-
+          cmake
+          -D CMAKE_C_FLAGS=-I/usr/local/include
+          -D CMAKE_EXE_LINKER_FLAGS=-L/usr/local/Cellar
+          -D DEBUG_CMAKE=1
+          -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -B _build-cm
+      - name: "cm: build"
+        run: cmake --build _build-cm --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+      - name: "at: autoreconf"
+        run: >-
+          ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'
+
+  msvc:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: x86, platform: Win32 }
+          - { arch: x64, platform: x64 }
+          - { arch: arm64, platform: ARM64 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: "cm: configure"
+        run: >-
+          cmake
+          -A ${{matrix.platform}}
+          -D DEBUG_CMAKE=1
+          -D CMAKE_SYSTEM_VERSION=11
+          -D CMAKE_C_FLAGS_RELWITHDEBINFO="/MT /GL /Zi /O2 /Ob1 /DNDEBUG"
+          -D CMAKE_CXX_FLAGS_RELWITHDEBINFO="/MT /GL /Zi /O2 /Ob1 /DNDEBUG"
+          -D CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="/DEBUG /INCREMENTAL:NO /LTCG /OPT:REF /OPT:ICF"
+          -B _build-cm
+      - name: "cm: build"
+        run: cmake --build _build-cm --config ${{env.BUILD_TYPE}} --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install
+
+      # This is running in powershell, not sh. Therefore find, env,
+      # sort do not work as usual.
+
+  mingw:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw64, env: x86_64 }
+          - { sys: ucrt64, env: ucrt-x86_64 }
+          - { sys: clang64, env: clang-x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-${{matrix.env}}-gcc
+            mingw-w64-${{matrix.env}}-cmake
+            automake1.16
+            autoconf2.72
+            mingw-w64-${{matrix.env}}-libtool
+      - name: "cm: configure"
+        run: >-
+          cmake
+          -G"MSYS Makefiles"
+          -D DEBUG_CMAKE=1
+          -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -B _build-cm
+      - name: "cm: build"
+        run: cmake --build _build-cm --verbose
+      - name: "cm: install"
+        run: cmake --build _build-cm --target install DESTDIR=$PWD/_dest-cm
+      - name: "cm: list installed files"
+        run: find _dest-cm | env LC_ALL=C sort | sed 's|^_dest-cm||'
+      - name: "at: autoreconf"
+        run: >-
+          ACV=-2.72
+
+          AMV=-1.16
+
+          env ACLOCAL=aclocal$AMV AUTOMAKE=automake$AMV AUTORECONF=autoreconf$ACV AUTOCONF=autoconf$ACV AUTOM4TE=autom4te$ACV AUTOHEADER=autoheader$ACV ./autogen.sh
+      - name: "at: configure"
+        run: >-
+          mkdir _build-at && cd _build-at
+
+          ../configure
+          --prefix=/usr/local
+      - name: "at: build"
+        run: make -C _build-at -j$(nproc)
+      - name: "at: install"
+        run: make -C _build-at install DESTDIR=$PWD/_dest-at
+      - name: "at: list installed files"
+        run: find _dest-at | env LC_ALL=C sort | sed 's|^_dest-at||'

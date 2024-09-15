@@ -22,13 +22,27 @@
 AC_PREREQ([2.63])
 
 # libserialport package version number (NOT the same as shared lib version!).
+m4_pattern_forbid([sp_package_])
 m4_define([sp_package_version_major], [0])
 m4_define([sp_package_version_minor], [1])
 m4_define([sp_package_version_micro], [1])
-m4_define([sp_package_version], [sp_package_version_major.sp_package_version_minor.sp_package_version_micro])
+m4_define([sp_package_version_tweak], [23])
+m4_define([sp_package_version], [sp_package_version_major.sp_package_version_minor.sp_package_version_micro]m4_ifdef([sp_package_version_tweak], [.][sp_package_version_tweak]))
 
-AC_INIT([libserialport], [sp_package_version], [martin-libserialport@earth.li],
-	[libserialport], [http://sigrok.org/wiki/Libserialport])
+# Library version for libserialport (NOT the same as the package version).
+# Carefully read the libtool docs before updating these numbers!
+# The algorithm for determining which number to change (and how) is nontrivial!
+# http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
+m4_define([sp_lib_version_current],  [1])
+m4_define([sp_lib_version_revision], [0])
+m4_define([sp_lib_version_age],      [1])
+m4_define([sp_lib_version], [sp_lib_version_current:sp_lib_version_revision:sp_lib_version_age])
+
+AC_INIT([avrdudes bugfix fork of sigrok libserialport],
+	[sp_package_version],
+	[https://github.com/avrdudes/libserialport/issues],
+	[libserialport],
+	[https://github.com/avrdudes/libserialport])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([autostuff])
 AC_CONFIG_AUX_DIR([autostuff])
@@ -47,8 +61,22 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_SED
 AC_PROG_INSTALL
 AC_PROG_LN_S
+
+AC_DEFUN([SP_PROG], [dnl
+  m4_assert([$# >= 2])[]dnl
+  AC_ARG_VAR(m4_toupper($1), [$2])
+  AS_VAR_IF(m4_toupper($1), [], [dnl
+    AC_PATH_PROG(m4_toupper($1), [$1], [no])
+  ])
+  AM_CONDITIONAL([HAVE_PROG_]m4_toupper($1), [test "x$m4_toupper($1)" != xno])
+])dnl
+
+SP_PROG([doxygen], [doxygen documentation system])
+SP_PROG([git],     [git revision control system])
+
 
 ## SP_PROG_VERSION(program, sh-var)
 ## Obtain the version of <program> and store it in <sh-var>.
@@ -66,26 +94,73 @@ SP_PROG_VERSION([$CC], [sp_cc_version])
 # Initialize libtool.
 LT_INIT
 
-AC_DEFINE([SP_PACKAGE_VERSION_MAJOR], [sp_package_version_major], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_MINOR], [sp_package_version_minor], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_MICRO], [sp_package_version_micro], [.])
-AC_DEFINE([SP_PACKAGE_VERSION_STRING], ["sp_package_version"], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MAJOR],  [sp_package_version_major], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MINOR],  [sp_package_version_minor], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_MICRO],  [sp_package_version_micro], [.])
+AC_DEFINE_UNQUOTED([SP_PACKAGE_VERSION_STRING], ["sp_package_version"],     [.])
 AC_SUBST([SP_PACKAGE_VERSION], [sp_package_version])
 
-# Library version for libserialport (NOT the same as the package version).
-# Carefully read the libtool docs before updating these numbers!
-# The algorithm for determining which number to change (and how) is nontrivial!
-# http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
-SP_LIB_VERSION_CURRENT=1
-SP_LIB_VERSION_REVISION=0
-SP_LIB_VERSION_AGE=1
-AC_SUBST([SP_LIB_VERSION],
-	["$SP_LIB_VERSION_CURRENT:$SP_LIB_VERSION_REVISION:$SP_LIB_VERSION_AGE"])
+AC_SUBST([SP_LIB_VERSION], ["sp_lib_version"])
 
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_CURRENT], [$SP_LIB_VERSION_CURRENT], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_REVISION], [$SP_LIB_VERSION_REVISION], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_AGE], [$SP_LIB_VERSION_AGE], [.])
-AC_DEFINE_UNQUOTED([SP_LIB_VERSION_STRING], ["$SP_LIB_VERSION"], [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_CURRENT],  [sp_lib_version_current],  [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_REVISION], [sp_lib_version_revision], [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_AGE],      [sp_lib_version_age],      [.])
+AC_DEFINE_UNQUOTED([SP_LIB_VERSION_STRING],   ["sp_lib_version"],        [.])
+
+dnl ------------------------------------------------------------------------
+dnl When necessary, update the libserialport.h source file according
+dnl to changed above sp_package_version* and sp_lib_version* values.
+dnl ------------------------------------------------------------------------
+m4_define([sp_sed_command_args], [])dnl
+m4_define([sp_sed_command_add], [dnl
+  m4_append([sp_sed_command_args],
+            [ -e 's|^\([[:punct:]]define $1\)[[:space:]].*|\1 ]$2[|g'])dnl
+])dnl
+dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MAJOR],  [sp_package_version_major])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MINOR],  [sp_package_version_minor])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_MICRO],  [sp_package_version_micro])dnl
+sp_sed_command_add([SP_PACKAGE_VERSION_STRING], ["sp_package_version"])dnl
+dnl
+sp_sed_command_add([SP_LIB_VERSION_CURRENT],  [sp_lib_version_current])dnl
+sp_sed_command_add([SP_LIB_VERSION_REVISION], [sp_lib_version_revision])dnl
+sp_sed_command_add([SP_LIB_VERSION_AGE],      [sp_lib_version_age])dnl
+sp_sed_command_add([SP_LIB_VERSION_STRING],   ["sp_lib_version"])dnl
+dnl
+m4_esyscmd([./buildstuff/sed-update-source-file libserialport.h]m4_defn([sp_sed_command_args]))dnl
+m4_case(m4_sysval, [0], [], [dnl
+  m4_fatal([sed-update-source-file script returned non-0])
+])dnl
+
+dnl ------------------------------------------------------------------------
+dnl Generate the CMakeLists.txt file from CMakeLists.txt.in according
+dnl to the above sp_package_version* and sp_lib_version* values.
+dnl ------------------------------------------------------------------------
+m4_define([sp_sed_command_args], [])dnl
+m4_define([sp_sed_command_add], [dnl
+  m4_append([sp_sed_command_args],
+            [ -e 's|[@]]$1[@|]$2[|g'])dnl
+])dnl
+dnl
+sp_sed_command_add([PACKAGE_TARNAME], [AC_PACKAGE_TARNAME])dnl
+sp_sed_command_add([PACKAGE_NAME],    [AC_PACKAGE_NAME])dnl
+sp_sed_command_add([PACKAGE_VERSION], [AC_PACKAGE_VERSION])dnl
+sp_sed_command_add([PACKAGE_URL],     [AC_PACKAGE_URL])dnl
+dnl
+dnl TODO: Make sure the _minor and _micro values are calculcated correctly.
+m4_define([cmake_lib_version_major], [m4_eval(sp_lib_version_current - sp_lib_version_age)])dnl
+m4_define([cmake_lib_version_minor], [sp_lib_version_age])dnl
+m4_define([cmake_lib_version_micro], [sp_lib_version_revision])dnl
+m4_define([cmake_lib_version], m4_defn([cmake_lib_version_major]).m4_defn([cmake_lib_version_minor]).m4_defn([cmake_lib_version_micro]))dnl
+sp_sed_command_add([CMAKE_LIB_SOVERSION], [cmake_lib_version_major])dnl
+sp_sed_command_add([CMAKE_LIB_VERSION],   [cmake_lib_version])dnl
+dnl
+
+m4_esyscmd([./buildstuff/sed-substitute CMakeLists.txt.in]m4_defn([sp_sed_command_args]))dnl
+m4_case(m4_sysval, [0], [], [dnl
+  m4_fatal([sed-substitute script returned non-0])
+])dnl
+
 
 AM_CONDITIONAL([LINUX], [test -z "${host_os##linux*}" || test -z "${host_os##uclinux*}"])
 AM_CONDITIONAL([WIN32], [test -z "${host_os##mingw*}"])
@@ -157,7 +232,7 @@ AS_CASE([$sp_cv_visibility_control],
 AC_DEFINE_UNQUOTED([SP_API], [$SP_API], [Macro preceding public API functions])
 AC_DEFINE_UNQUOTED([SP_PRIV], [$SP_PRIV], [Macro preceding private functions])
 
-AC_CONFIG_FILES([Makefile libserialport.pc])
+AC_CONFIG_FILES([Doxyfile Makefile libserialport.pc windows.rc])
 
 AC_OUTPUT
 

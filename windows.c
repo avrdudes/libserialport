@@ -454,8 +454,9 @@ SP_PRIV enum sp_return get_port_details(struct sp_port *port)
 				if (CM_Get_DevNode_Registry_PropertyA(dev_inst, CM_DRP_ADDRESS,
 				                        0, &address, &size, 0) == CR_SUCCESS) {
 					strcpy(tmp, usb_path);
-					snprintf(usb_path, sizeof(usb_path), "%d%s%s",
-					         (int)address, *tmp ? "." : "", tmp);
+					/* FIXME: string length, address value range, etc. */
+					snprintf(usb_path, sizeof(usb_path), "%u%s%s",
+					         (BYTE)(0xff & address), *tmp ? "." : "", tmp);
 				}
 			} while (CM_Get_Parent(&dev_inst, dev_inst, 0) == CR_SUCCESS);
 

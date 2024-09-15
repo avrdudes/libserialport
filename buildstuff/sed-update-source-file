@@ -1,0 +1,58 @@
+#! /bin/sh
+#
+# Usage:
+#   sed-update-source-file <filename> sed-arguments...
+#
+# This will take the given source file <filename>, run sed with the
+# given sed commands on it, and if the sed output differs from the
+# input, will update <filename> and abort the autoreconf process.
+
+set -e
+
+prog="$(basename "$0")"
+
+fname="$1"
+test -n "$fname" || {
+    echo "$prog: error: no source file given" >&2
+    exit 2
+}
+shift
+test -f "$fname" || {
+    echo "$prog: error: source file is no file: $fname" >&2
+    exit 2
+}
+
+tname="$fname.tmp.$$"
+qname="$fname.tmq.$$"
+
+${SED-sed} "$@" < "$fname" > "$qname" || {
+    s="$?"
+    echo "$prog: Error running sed, exit code $s" >&2
+    rm -f "$qname"
+    exit 2
+}
+
+cat < "$qname" > "$tname" || {
+    s="$?"
+    echo "$prog: Error running tr, exit code $s" >&2
+    rm -f "$qname" "$tname"
+    exit 2
+}
+rm -f "$qname"
+
+test -s "$tname" || {
+    echo "$prog: sed has produced an empty file" >&2
+    exit 2
+}
+
+if ${CMP-cmp} "$fname" "$tname" > /dev/null; then
+    # echo "$prog: source file up to date: $fname" >&2
+    rm -f "$tname"
+    exit 0
+else
+    ${DIFF-diff} -u "$fname" "$tname" >&2 ||:
+    mv -f "$tname" "$fname"
+    echo "$prog: source file has been updated: $fname" >&2
+    echo "$prog: commit the file, and then re-run autoreconf." >&2
+    exit 1
+fi

@@ -1,0 +1,143 @@
+# ======================================================================
+# CMakeLists.txt.  Generated from CMakeLists.txt.in by configure.ac.
+# ======================================================================
+# !!!!!!! DO NOT MODIFY THIS FILE !!!!!!!!
+# ======================================================================
+# EDIT CMakeLists.txt.in INSTEAD AND RE-RUN autoreconf/autogen.sh
+# ======================================================================
+
+cmake_minimum_required(VERSION 3.14)
+
+project(libserialport
+  VERSION "0.1.1.23"
+  DESCRIPTION "avrdudes bugfix fork of sigrok libserialport"
+  HOMEPAGE_URL "https://github.com/avrdudes/libserialport"
+  LANGUAGES C
+)
+
+include(GNUInstallDirs)
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/libserialport.pc.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libserialport.pc"
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libserialport.pc"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
+
+if     (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(LSP_SOURCES "macosx.c")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+  set(LSP_SOURCES "freebsd.c")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(LSP_SOURCES linux.c linux_termios.c linux_termios.h)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(LSP_SOURCES "windows.c")
+else()
+  message(FATAL_ERROR
+    config.h
+    "${CMAKE_PROJECT_NAME} does not support this system: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
+try_compile(VISIBILITY_CONTROL_ATTRIBUTE
+  "${PROJECT_BINARY_DIR}/bindir1"
+  "${CMAKE_CURRENT_SOURCE_DIR}/test-visibility-control-attribute.c"
+)
+try_compile(VISIBILITY_CONTROL_DECLSPEC
+  "${PROJECT_BINARY_DIR}/bindir2"
+  "${CMAKE_CURRENT_SOURCE_DIR}/test-visibility-control-declspec.c"
+)
+if(VISIBILITY_CONTROL_ATTRIBUTE)
+  set(SP_API  "__attribute__((visibility(\"default\")))")
+  set(SP_PRIV "__attribute__((visibility(\"hidden\")))")
+elseif(VISIBILITY_CONTROL_DECLSPEC)
+  set(SP_API  "__declspec(dllexport)")
+  set(SP_PRIV "")
+else()
+  set(SP_API  "")
+  set(SP_PRIV "")
+endif()
+
+set(EXTRA_WINDOWS_SOURCES)
+set(EXTRA_WINDOWS_INCLUDES)
+set(EXTRA_WINDOWS_RESOURCES)
+set(EXTRA_WINDOWS_LIBRARIES)
+
+if(WIN32 OR MINGW)
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/windows.rc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/windows.rc"
+  )
+  list(APPEND EXTRA_WINDOWS_RESOURCES "${CMAKE_CURRENT_BINARY_DIR}/windows.rc")
+  list(APPEND EXTRA_WINDOWS_LIBRARIES setupapi ws2_32)
+endif()
+
+if(MSVC)
+else()
+  add_compile_options(-Wall -Wextra -Wno-unused-parameter) # -Werror)
+endif()
+
+# FIXME: -no-undefined for Linux
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake-config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
+
+add_library(libserialport SHARED
+  serialport.c
+  timing.c
+  ${LSP_SOURCES}
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+  ${EXTRA_WINDOWS_SOURCES}
+  ${EXTRA_WINDOWS_RESOURCES}
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(EXTRA_MACOS_LIBRARIES
+    "-framework IOKit"
+    "-framework CoreFoundation"
+  )
+else()
+  set(EXTRA_MACOS_LIBRARIES)
+endif()
+
+target_compile_features(libserialport PRIVATE c_std_99)
+target_link_libraries(libserialport
+  PUBLIC
+  ${EXTRA_WINDOWS_LIBRARIES}
+  ${EXTRA_MACOS_LIBRARIES}
+)
+set_target_properties(libserialport PROPERTIES C_EXTENSIONS OFF)
+
+if(MSVC OR MINGW)
+  target_compile_definitions(libserialport
+    PRIVATE LIBSERIALPORT_MSBUILD
+  )
+else()
+  target_compile_definitions(libserialport
+    PRIVATE LIBSERIALPORT_ATBUILD
+  )
+endif()
+
+target_include_directories(libserialport
+  PUBLIC
+  "${PROJECT_BINARY_DIR}"
+  "${PROJECT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+set_target_properties(libserialport PROPERTIES
+  PREFIX ""
+  PUBLIC_HEADER "libserialport.h"
+  VERSION 0.1.0
+  SOVERSION 0
+)
+
+install(TARGETS libserialport
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  PUBLIC_HEADER DESTINATION include COMPONENT dev
+)
