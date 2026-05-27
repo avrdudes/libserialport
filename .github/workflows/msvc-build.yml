@@ -28,21 +28,29 @@ jobs:
       - name: Configure and Build
         shell: cmd
         run: |
-          :: Initialize the Visual Studio environment
-          call "%VS170COMNTOOLS%..\..\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arg }}
+          :: Explicitly call the vcvarsall.bat using the verified standard path
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arg }}
           
-          :: Configure CMake for Static Build
+          :: Verify that the MSVC environment is active by checking for 'cl'
+          where cl
+          if %errorlevel% neq 0 (
+            echo "MSVC environment NOT found!"
+            exit /b 1
+          )
+
+          :: Configure with explicit paths to ensure Ninja picks up cl.exe
           cmake -B build -G "Ninja" ^
+            -DCMAKE_C_COMPILER=cl ^
+            -DCMAKE_CXX_COMPILER=cl ^
             -DCMAKE_BUILD_TYPE=Release ^
             -DBUILD_SHARED_LIBS=OFF ^
             -DLIBSERIALPORT_BUILD_EXAMPLES=OFF ^
             -DLIBSERIALPORT_MSBUILD=1
             
-          :: Build the project
           cmake --build build --config Release
-
+          
       - name: Upload Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: libserialport-${{ matrix.arch }}
           path: build/*.lib
