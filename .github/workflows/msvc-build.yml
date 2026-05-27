@@ -1,0 +1,32 @@
+name: MSVC Static Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: x86, platform: Win32 }
+          - { arch: x64, platform: x64 }
+          - { arch: arm64, platform: ARM64 }
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure
+        run: >-
+          cmake 
+          -A ${{ matrix.platform }}
+          -DBUILD_SHARED_LIBS=OFF
+          -DLIBSERIALPORT_BUILD_EXAMPLES=OFF
+          -B build
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: libserialport-${{ matrix.arch }}
+          path: build/Release/*.lib # Adjust path based on your output
