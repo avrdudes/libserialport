@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 project(libserialport C)
 
-# Define everything here to avoid command-line errors
 add_compile_definitions(
     _CRT_SECURE_NO_WARNINGS=1
     SP_PRIV=
+    SP_API=
+    LIBSERIALPORT_MSBUILD=1
 )
 
 # List your sources
