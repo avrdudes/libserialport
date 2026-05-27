@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 project(libserialport C)
 
-# Standardize warnings
-add_compile_definitions(_CRT_SECURE_NO_WARNINGS=1)
+# Define everything here to avoid command-line errors
+add_compile_definitions(
+    _CRT_SECURE_NO_WARNINGS=1
+    SP_PRIV=
+)
 
 # List your sources
 set(SERIALPORT_SOURCES
