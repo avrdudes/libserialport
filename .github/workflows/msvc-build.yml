@@ -1,0 +1,46 @@
+name: MSVC Static Build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            vcvars_arg: x64_x86
+          - arch: x64
+            vcvars_arg: x64
+          - arch: arm64
+            vcvars_arg: x64_arm64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure and Build
+        shell: cmd
+        run: |
+          :: Initialize the Visual Studio environment
+          call "%VS170COMNTOOLS%..\..\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arg }}
+          
+          :: Configure CMake for Static Build
+          cmake -B build -G "Ninja" ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DBUILD_SHARED_LIBS=OFF
+            
+          :: Build the project
+          cmake --build build --config Release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libserialport-${{ matrix.arch }}
+          path: build/*.lib
