@@ -1,56 +1,32 @@
 name: MSVC Static Build
 
-on:
-  push:
-    branches: ['**']
-  pull_request:
-    branches: ['**']
+on: [push, pull_request]
 
 jobs:
   build:
-    name: Build ${{ matrix.arch }}
     runs-on: windows-latest
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - arch: x86
-            vcvars_arg: x64_x86
-          - arch: x64
-            vcvars_arg: x64
-          - arch: arm64
-            vcvars_arg: x64_arm64
-
+          - { arch: x86, platform: Win32 }
+          - { arch: x64, platform: x64 }
+          - { arch: arm64, platform: ARM64 }
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - name: Configure and Build
-        shell: cmd
-        run: |
-          :: Explicitly call the vcvarsall.bat using the verified standard path
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vcvars_arg }}
-          
-          :: Verify that the MSVC environment is active by checking for 'cl'
-          where cl
-          if %errorlevel% neq 0 (
-            echo "MSVC environment NOT found!"
-            exit /b 1
-          )
+      - name: Configure
+        run: >-
+          cmake 
+          -A ${{ matrix.platform }}
+          -DBUILD_SHARED_LIBS=OFF
+          -DLIBSERIALPORT_BUILD_EXAMPLES=OFF
+          -B build
 
-          :: Configure with explicit paths to ensure Ninja picks up cl.exe
-          cmake -B build -G "Ninja" ^
-            -DCMAKE_C_COMPILER=cl ^
-            -DCMAKE_CXX_COMPILER=cl ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DBUILD_SHARED_LIBS=OFF ^
-            -DLIBSERIALPORT_BUILD_EXAMPLES=OFF ^
-            -DLIBSERIALPORT_MSBUILD=1
-            
-          cmake --build build --config Release
-          
-      - name: Upload Artifact
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Archive
         uses: actions/upload-artifact@v4
         with:
           name: libserialport-${{ matrix.arch }}
-          path: build/*.lib
+          path: build/Release/*.lib # Adjust path based on your output
