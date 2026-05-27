@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configure and Build
         shell: cmd
@@ -34,13 +34,15 @@ jobs:
           :: Configure CMake for Static Build
           cmake -B build -G "Ninja" ^
             -DCMAKE_BUILD_TYPE=Release ^
-            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_SHARED_LIBS=OFF ^
+            -DLIBSERIALPORT_BUILD_EXAMPLES=OFF ^
+            -DLIBSERIALPORT_MSBUILD=1
             
           :: Build the project
           cmake --build build --config Release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: libserialport-${{ matrix.arch }}
           path: build/*.lib
