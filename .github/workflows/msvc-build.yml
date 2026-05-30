@@ -1,32 +1,44 @@
-name: MSVC Static Build
+name: MSVC Build All Archs
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
 
 jobs:
   build:
+    name: Build ${{ matrix.arch }}
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - { arch: x86, platform: Win32 }
           - { arch: x64, platform: x64 }
           - { arch: arm64, platform: ARM64 }
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Code
+        uses: actions/checkout@v6
 
-      - name: Configure
-        run: >-
-          cmake 
-          -A ${{ matrix.platform }}
-          -DBUILD_SHARED_LIBS=OFF
-          -DLIBSERIALPORT_BUILD_EXAMPLES=OFF
-          -B build
+      - name: Build Shared Library
+        run: |
+          cmake -B build-shared -A ${{ matrix.platform }} -DBUILD_SHARED_LIBS=ON
+          cmake --build build-shared --config Release
 
-      - name: Build
-        run: cmake --build build --config Release
+      - name: Build Static Library
+        run: |
+          cmake -B build-static -A ${{ matrix.platform }} -DBUILD_SHARED_LIBS=OFF
+          cmake --build build-static --config Release
 
-      - name: Archive
+      - name: Archive Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: libserialport-${{ matrix.arch }}
-          path: build/Release/*.lib # Adjust path based on your output
+          path: |
+            build-shared/Release/serialport.dll
+            build-shared/Release/serialport.lib
+            build-shared/Release/list_ports.exe
+            build-static/Release/serialport.lib
+            build-static/Release/list_ports.exe
